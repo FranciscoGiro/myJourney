@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"fmt"
-	"os"
 	"context"
 	"time"
 	"net/http"
+	"errors"
 	"github.com/FranciscoGiro/myJourney/backend/src/services"
+	"github.com/FranciscoGiro/myJourney/backend/src/models"
+	"github.com/FranciscoGiro/myJourney/backend/src/auth"
 
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -18,11 +20,16 @@ type UserController struct {
 	userService services.UserService
 }
 
-
 func NewUserController() *UserController {
-    return &UserController{userService: services.NewUserService()}
+    return &UserController{
+		userService: services.NewUserService(),
+	}
 }
 
+type Claims struct {
+	User *models.User `json:user`
+	jwt.StandardClaims
+}
 
 func (uc *UserController) Signup(c *gin.Context) {
 
@@ -47,6 +54,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 
 	hash_pass, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10) // SALT ROUNDS
 	if err != nil {
+		fmt.Println("Unable to generate hash password. Error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to hash given password"})
 		return
 	}
@@ -85,24 +93,13 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-
-	secret_key := os.Getenv("SECRET_KEY")
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-		"name": user.Name,
-		"role": user.Role,
-		"exp": time.Now().Add(time.Hour * 1).Unix(),
-	})
-
-	signed_token, err := token.SignedString(secret_key)
+	token, err := auth.GenerateToken(&user)
 	if err != nil {
-		fmt.Println("ERROR:", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error signing token"})
+		c.JSON(http.StatusInternalServerError, errors.New("Unable to register. Please try again"))
+		return
 	}
 
-	c.SetSameSize(http.SameSiteLaxMode)
-	c.Cookie("Authorization", signed_token, 3600, "", "", false, true)
+	c.SetCookie("Authorization", token, 3600, "", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
@@ -125,7 +122,6 @@ func (uc *UserController) GetUsers(c *gin.Context){
 
 func (uc *UserController) GetUser(c *gin.Context){
 	user_id := c.Param("id")
-	fmt.Println("User ID:", user_id)
 
 	user, err := uc.userService.GetUserByID(user_id)
 

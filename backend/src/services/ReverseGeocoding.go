@@ -3,12 +3,15 @@ package services
 import (
     "fmt"
 	"os"
+	"errors"
     "io/ioutil"
-    "log"
     "net/http"
 	"encoding/json"
 )
 
+var (
+	unableToReadLocation = errors.New("Unable to read image location. Please insert one")
+)
 
 type GeoLocation struct {
 	Items []struct {
@@ -24,16 +27,17 @@ type GeoLocation struct {
 func ReverseGeocode(lat, lng *float64) (string, string, error){
 	apikey := os.Getenv("GEOCODING_KEY")
 
-    url := "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + apikey + "&at=" + fmt.Sprint(*lat) + "," + fmt.Sprint(*lng)
+    url := fmt.Sprintf("https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=%s&at=%s,%s", apikey, *lat, *lng)
 
-    res, err := http.Get(url)
+	res, err := http.Get(url)
     if err != nil {
-        fmt.Println("Couldn't get response from ReverseGeocode server:, err")
-		return "", "", err
+		fmt.Println("Unable to access Reverse Geocode url. Error:", err)
+		return "", "", unableToReadLocation
     }
     body, err := ioutil.ReadAll(res.Body)
     if err != nil {
-        log.Fatalln(err)
+		fmt.Println("Unable to read response. Error:", err)
+		return "", "", unableToReadLocation
     }
 
 	var data GeoLocation
@@ -44,8 +48,6 @@ func ReverseGeocode(lat, lng *float64) (string, string, error){
 	for _, item := range data.Items {
 		city = item.Address.City
 		country = item.Address.CountryName
-		fmt.Println("CITY:",item.Address.City)
-		fmt.Println("COUNTRY:",item.Address.CountryName)
 	}
 
 

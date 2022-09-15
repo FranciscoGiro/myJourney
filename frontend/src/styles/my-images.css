@@ -1,0 +1,52 @@
+* {
+    border: 0;
+    margin: 0;
+    padding: 0px;
+}
+
+.image-gallery {
+	width: 80%;
+	margin: auto;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 10px;
+}
+
+.image-card {
+    position: relative;
+    height: 330px;
+    width: 250px;
+	padding: 5px;
+	margin: 5px;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+}
+
+.image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 220px;
+    max-height: 250px;
+    min-width: 100px;
+    min-height: 100px;
+}
+
+.image-date {
+    position: absolute;
+    bottom: 0%;
+    left: 0%;
+    font-size: 0.7rem;
+    margin-left: 12px;
+    padding-bottom: 3px;
+}
+
+.image-place {
+    position: absolute;
+    bottom: 0%;
+    left: 0%;
+    font-size: 0.7rem;
+    margin-left: 12px;
+    padding-bottom: 18px;
+}

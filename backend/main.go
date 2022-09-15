@@ -6,39 +6,59 @@ import(
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/FranciscoGiro/myJourney/backend/src/routes"
+	"github.com/FranciscoGiro/myJourney/backend/src/middlewares"
+	"github.com/FranciscoGiro/myJourney/backend/src/controllers"
 	"github.com/FranciscoGiro/myJourney/backend/src/database"
 )
+
+type Handlers struct {
+	imageController *controllers.ImageController
+	userController *controllers.UserController
+}
 
 
 func main() {
 
-	fmt.Println("Vou começar aqui")
-
-	mydir, err := os.Getwd()
-    if err != nil {
-        fmt.Println(err)
-    }
-    fmt.Println("MY DIRECTORY:",mydir)
-
-	err = godotenv.Load(".env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		fmt.Printf("Error loading environment variables")
 		os.Exit(1)
 	}
-
 	port := os.Getenv("PORT")
 
+
+	database.Init()
 	defer database.Disconnect()
 
+	h := handlers() 
+	app := setServer(h)
+	app.Run(":"+port)
+}
+
+
+
+func handlers() *Handlers {
+	return &Handlers{
+		imageController: controllers.NewImageController(),
+		userController: controllers.NewUserController(),
+	}
+}
+
+func setServer(h *Handlers) *gin.Engine {
+	app := gin.Default()
+	app.Use(middlewares.Cors())
 	
+	routes := app.Group("/api/auth")
+	routes.POST("/signup", h.userController.Signup)
+	routes.POST("/login", h.userController.Login)
 
-	app := gin.New()
-	router := app.Group("/api/")
-	routes.AllRoutes(router) // pass client if needed
+	authRoutes := app.Group("/api")//.Use(middlewares.AuthMiddleware())
+	authRoutes.POST("/images", h.imageController.UploadImage)
+	authRoutes.GET("/images", h.imageController.GetAllImages)
 
+	authRoutes.GET("/users", h.userController.GetUsers)
+	authRoutes.GET("/users/:id", h.userController.GetUser)
 
-    app.Run(":"+port)
+	return app
 
-	fmt.Println("Server started on port ", os.Getenv("SERVER_PORT"))
 }

@@ -2,6 +2,9 @@ package controllers
 
 import (
 	"fmt"
+	"context"
+	"time"
+	"errors"
 	"net/http"
 	"path/filepath"
 
@@ -22,14 +25,17 @@ func NewImageController() *ImageController {
 
 func (ic *ImageController) UploadImage(c *gin.Context){
 
+	//TODO get real user
+	var user_id = "124324235235235235235"
+	
 	image, header, err := c.Request.FormFile("file")
 	if err != nil {
-		fmt.Printf("No file uploaded")
-		c.JSON(http.StatusInternalServerError, err)
+		fmt.Println("Unable to get files from form-data. Error:", err)
+		c.JSON(http.StatusInternalServerError, errors.New("Unable to read uploaded files. Please try again"))
 	}
 
-	var file_extension string
-	file_extension = filepath.Ext(header.Filename)
+
+	var file_extension = filepath.Ext(header.Filename)
 
 
 	lat, lng, date, err := ic.imageService.GetMetadata(&image)
@@ -38,27 +44,51 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 		return
 	}
 
+	//rewind file pointer to beginning
+	_, err = image.Seek(0, 0) 
+    if err != nil {
+		fmt.Println("Unable to rewind file pointer. Error:", err)
+		c.JSON(http.StatusInternalServerError, errors.New("Something went wrong. Try again"))
+		return
+	}
+
 	city, country, err := services.ReverseGeocode(&lat, &lng)
 	if err != nil {
-		fmt.Println("Unable to reverse geo coordinates with error:", err)
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 
-	image_id, err := ic.imageService.SaveImage(&lat, &lng, &country, &city, &date)
+	image_id, err := ic.imageService.CreateImage(&lat, &lng, &country, &city, &date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
-	err = ic.imageService.UploadImage(&image, image_id, file_extension)
+
+	
+	err = ic.imageService.StoreImage(&image, user_id, image_id, file_extension)
 	if err != nil {
-		fmt.Println("Error uploading image:", err)
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, "ok")
 
+}
+
+
+func (ic *ImageController) GetAllImages(c *gin.Context){
+	
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	result, err := ic.imageService.GetAllImages(ctx)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }

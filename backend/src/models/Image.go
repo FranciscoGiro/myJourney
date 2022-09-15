@@ -13,6 +13,7 @@ type Image struct {
 	Country 		string 	        		`json:"country" bson:"country"`
 	Lat 			float64 	        	`json:"lat" bson:"lat"`
 	Lng 			float64 	        	`json:"lng" bson:"lng"`
+	IsUploaded		bool					`json:"isUploaded bson:"isUploaded"`
 	Date	        time.Time	 		    `json:"date" bson:"date"`
 	CreatedAt 		time.Time 		        `json:"createdAt" bson:"createdAt"`
 }

@@ -13,7 +13,7 @@ func Init() *storage.Client{
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		log.Fatal("Unable to connect to Google Cloud Storage:", err)
+		log.Fatal("Unable to connect to Google Cloud Storage. Error", err)
 	}
 
 	return client

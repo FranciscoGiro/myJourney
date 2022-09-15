@@ -68,7 +68,7 @@ func (us *userService) GetUserByID(user_id string) (models.User, error) {
 
 	err := us.userCollection.FindOne(ctx, bson.M{"_id": uid}).Decode(&user)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		fmt.Println("Error:", err)
 		return models.User{}, userNotFoundError
 	}
 
@@ -96,7 +96,7 @@ func (us *userService) GetUser(name, email string) (models.User, error) {
 
 	err := us.userCollection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		fmt.Println("Error:", err)
 		return models.User{}, userNotFoundError
 	}
 

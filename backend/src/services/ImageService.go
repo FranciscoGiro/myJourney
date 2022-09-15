@@ -5,21 +5,31 @@ import (
 	"time"
 	"context"
 	"errors"
-	"io"
 	"os"
+	"io"
 	"github.com/FranciscoGiro/myJourney/backend/src/database"
 	"github.com/FranciscoGiro/myJourney/backend/src/models"
 	"github.com/rwcarlsen/goexif/exif"
 	"mime/multipart"
 
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+var(
+	unableToReadEXIF = errors.New("Unable to read image properties. Check if image contains it, otherwise upload with location")
+	unableToReadDate = errors.New("Unable to read image original date. Check if image contains it, otherwise upload with location and date")
+	unableToUpload = errors.New("Unable to upload image")
+	unableToFindImages = errors.New("No images found")
 )
 
 type ImageService interface {
-	SaveImage(lat *float64, lng *float64, country *string, city *string, date *time.Time) (string, error)
+	GetAllImages(ctx context.Context) ([]models.Image, error)
+	CreateImage(lat *float64, lng *float64, country *string, city *string, date *time.Time) (string, error)
 	UploadImage(image *multipart.File, id, file_extension string) error
+	StoreImage(image *multipart.File, user_id, image_id, file_extension string) error
 	GetMetadata(image *multipart.File) (float64, float64, time.Time, error)
 }
 
@@ -32,36 +42,6 @@ func NewImageService() *imageService {
 	return &imageService{imageCollection: collection}
 }
 
-
-func (is *imageService) SaveImage(lat *float64, lng *float64, 
-	country *string, city *string, date *time.Time) (string, error) {
-
-	id := primitive.NewObjectID()
-
-	newImage := &models.Image{
-		ID: id,
-		User_id: "user id", // TODO , user needs to be inserted 
-		City: *city,
-		Country: *country,
-		Lat: *lat,
-		Lng: *lng,
-		Date: *date,
-		CreatedAt: time.Now(), //fix date format
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := is.imageCollection.InsertOne(ctx, newImage)
-	if err != nil {
-		fmt.Printf("Error inserting image:", err)
-		return "", err
-	}
-
-	return id.Hex(), nil
-} 
-
-
 func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, time.Time, error){
 
 	var(
@@ -72,26 +52,63 @@ func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, ti
 	metadata, err := exif.Decode(*image)
     if err != nil {
 		// fix this, should not be error 400
-		fmt.Println("Unable to read EXIF metadata: ", err)
-		return lat, lng, date, errors.New("Unable to extract image metadata")
+		fmt.Println("Unable to read EXIF metadata. Error:", err)
+		return lat, lng, date, unableToReadEXIF
     }
 
 	lat, lng, err = metadata.LatLong()
 	if err != nil {
-		fmt.Println("Unable to retrieve coordinates from image:", err)
-		return lat, lng, date, errors.New("No geo coordinates found in image")
+		fmt.Println("Unable to retrieve LAT LONG from image. Error:", err)
+		return lat, lng, date, unableToReadEXIF
 	}
 
 	date, err = metadata.DateTime()
 	if err != nil {
-		fmt.Println("Unable to retrieve date from image:", err)
-		return lat, lng, date, errors.New("Unable to retrieve date from image")
+		fmt.Println("Unable to retrieve DATE from image. Error:", err)
+		return lat, lng, date, unableToReadDate
 	}
 
 	return lat, lng, date, nil
 }
 
+//save image inside tmp folder
+//save it also inside a temporary user folder in order to upload to google cloud storage
+func (is *imageService) CreateImage(lat *float64, lng *float64, 
+	country *string, city *string, date *time.Time) (string, error) {
 
+	//TODO id should be given by MongoDb and then retrieved once uploaded
+	id := primitive.NewObjectID()
+	
+	newImage := &models.Image{
+		ID: id,
+		User_id: "user id", // TODO , user needs to be inserted 
+		City: *city,
+		Country: *country,
+		Lat: *lat,
+		Lng: *lng,
+		Date: *date,
+		IsUploaded: false,
+		CreatedAt: time.Now(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := is.imageCollection.InsertOne(ctx, newImage)
+	if err != nil {
+		fmt.Printf("Error inserting image in database. Error:", err)
+		return "", unableToUpload
+	}
+
+	return id.Hex(), nil
+} 
+
+
+
+
+//TODO 
+//change this function to a scheduled one
+//goes through tmp folder and uploads all images in there
 func (is *imageService) UploadImage(image *multipart.File, id, file_extension string) error {
 
 	var (
@@ -100,20 +117,60 @@ func (is *imageService) UploadImage(image *multipart.File, id, file_extension st
 		filename = fmt.Sprintf("%s%s",id, file_extension)
 	)
 
-	fmt.Println(filename)
-
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
 	obj := client.Bucket(bucket_name).Object("photos/"+filename).NewWriter(ctx)
 	if _, err := io.Copy(obj, *image); err != nil {
-		fmt.Println("Error coping image file", err)
-		return err
+		fmt.Println("Error coping image image to Google Cloud Storage. Error:", err)
+		return unableToUpload
 	}
 	if err := obj.Close(); err != nil {
-		fmt.Println("Error closing image file", err)
-		return err
+		fmt.Println("Error closing Google Cloud Storage file. Error:", err)
+		return unableToUpload
+	}
+
+	//TODO isUploaded= true in database
+
+	return nil
+}
+
+func (is *imageService) StoreImage(image *multipart.File, user_id, image_id, file_extension string) error {
+
+	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id, image_id, file_extension))
+	defer dst.Close()
+	if err != nil {
+		fmt.Println("Unable to create temp file. Error:", err)
+		return unableToUpload
+	}
+
+	if _, err := io.Copy(dst, *image); err != nil {
+		fmt.Println("Unable to copy image to temp file. Error:", err)
+		return unableToUpload
 	}
 
 	return nil
+}
+
+//TODO
+//needs to look to database and google cloud storage and create a struct in order to
+//return the right information to frontend
+func (is *imageService) GetAllImages(ctx context.Context) ([]models.Image, error) {
+	//TODO 
+	//is result empty?
+	//should only retrieve images of the given user
+	result, err := is.imageCollection.Find(ctx, bson.D{{}})
+	if err != nil {
+		fmt.Println("Error retrieving images from database. Error:", err)
+		return nil, unableToFindImages
+	}
+
+	var images []models.Image
+	err = result.All(ctx, &images)
+	if err != nil {
+		fmt.Println("Error parsing images from database. Error:", err)
+		return nil, unableToFindImages
+	}
+
+	return images, nil
 }
