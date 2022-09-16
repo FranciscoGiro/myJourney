@@ -85,8 +85,7 @@ func (is *imageService) CreateImage(
 							user *models.User, 
 							lat *float64, lng *float64, 
 							country *string, city *string, 
-							date *time.Time
-							) (string, error) {
+							date *time.Time) (string, error) {
 
 	//TODO 
 	//id should be given by MongoDb and then retrieved once uploaded
@@ -121,8 +120,7 @@ func (is *imageService) CreateImage(
 
 func (is *imageService) UploadImage(
 							image *multipart.File, 
-							userID, imageID, file_extension string
-							) error {
+							userID, imageID, file_extension string) error {
 
 	var (
 		bucket_name = os.Getenv("BUCKET_NAME")
@@ -148,8 +146,7 @@ func (is *imageService) UploadImage(
 
 func (is *imageService) StoreImage(image *multipart.File, 
 								   user_id primitive.ObjectID,
-								   image_id, file_extension string
-								   ) error {
+								   image_id, file_extension string) error {
 
 	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id.Hex(), image_id, file_extension))
 	defer dst.Close()
@@ -171,8 +168,7 @@ func (is *imageService) StoreImage(image *multipart.File,
 //return the right information to frontend
 func (is *imageService) GetAllImages(
 									ctx context.Context, 
-									user *models.User) 
-									([]ImageInfo, error) {
+									user *models.User) ([]ImageInfo, error) {
 
 
 	result, err := is.imageCollection.Find(ctx, bson.M{"user_id": (*user).ID})
@@ -217,7 +213,7 @@ func (is *imageService) GetAllImages(
 	
 			res = append(res, imageInfo)
 		} else {
-			fmt.Println("Object not found in GCS")
+			fmt.Println("Object not found in GCS. UserID:", userID, "   ImageID:", imageID)
 		}
 	}
 

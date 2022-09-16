@@ -5,18 +5,11 @@ import (
 	"context"
 	"log"
 	"os"
-	"io/ioutil"
-	"io"
 	"time"
 	"google.golang.org/api/iterator"
 	"strings"
 	"errors"
 	"cloud.google.com/go/storage"
-
-	"github.com/FranciscoGiro/myJourney/backend/src/database"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
