@@ -42,7 +42,17 @@ func NewUserService() *userService {
 
 func (us *userService) GetUsers(ctx context.Context) ([]models.User, error) {
 
-	result, err := us.userCollection.Find(ctx, bson.D{{}})
+	fmt.Println(ctx)
+
+	err := UploadImages()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return nil, err
+
+	/*result, err := us.userCollection.Find(ctx, bson.D{{}})
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -55,7 +65,7 @@ func (us *userService) GetUsers(ctx context.Context) ([]models.User, error) {
 		return nil, err
 	}
 
-	return users, nil
+	return users, nil*/
 }
 
 func (us *userService) GetUserByID(user_id string) (models.User, error) {

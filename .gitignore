@@ -1,4 +1,5 @@
 backend/.env
 backend/credentials.json
+backend/src/tmp/
 
 frontend/.env

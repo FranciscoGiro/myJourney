@@ -27,7 +27,7 @@ type GeoLocation struct {
 func ReverseGeocode(lat, lng *float64) (string, string, error){
 	apikey := os.Getenv("GEOCODING_KEY")
 
-    url := fmt.Sprintf("https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=%s&at=%s,%s", apikey, *lat, *lng)
+    url := fmt.Sprint("https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=", apikey, "&at=", *lat, ",", *lng)
 
 	res, err := http.Get(url)
     if err != nil {
@@ -45,11 +45,15 @@ func ReverseGeocode(lat, lng *float64) (string, string, error){
 
 	var city, country string
 
+	fmt.Println("DATA:", res.Body)
+
 	for _, item := range data.Items {
 		city = item.Address.City
 		country = item.Address.CountryName
 	}
 
+	fmt.Println("CITY3:", city)
+	fmt.Println("COUNTRY3:", country)
 
 	return city, country, nil
 }

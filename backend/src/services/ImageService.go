@@ -26,15 +26,26 @@ var(
 )
 
 type ImageService interface {
-	GetAllImages(ctx context.Context) ([]models.Image, error)
-	CreateImage(lat *float64, lng *float64, country *string, city *string, date *time.Time) (string, error)
-	UploadImage(image *multipart.File, id, file_extension string) error
-	StoreImage(image *multipart.File, user_id, image_id, file_extension string) error
+	GetAllImages(ctx context.Context, user *models.User) ([]ImageInfo, error)
+	CreateImage(user *models.User, lat *float64, lng *float64, country *string, 
+		city *string, date *time.Time) (string, error)
+	UploadImage(image *multipart.File, userID, imageID, file_extension string) error
+	StoreImage(image *multipart.File, user_id primitive.ObjectID, image_id, file_extension string) error
 	GetMetadata(image *multipart.File) (float64, float64, time.Time, error)
 }
 
 type imageService struct {
 	imageCollection *mongo.Collection
+}
+
+type ImageInfo struct {
+	ID 			string 		`json:"id"`
+	Url 		string 		`json:"url"`
+	City 		string 	    `json:"city"`
+	Country 	string 	    `json:"country"`
+	Lat 		float64 	`json:"lat"`
+	Lng 		float64 	`json:"lng"`
+	Date	    time.Time	`json:"date"`
 }
 
 func NewImageService() *imageService {
@@ -73,15 +84,18 @@ func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, ti
 
 //save image inside tmp folder
 //save it also inside a temporary user folder in order to upload to google cloud storage
-func (is *imageService) CreateImage(lat *float64, lng *float64, 
+func (is *imageService) CreateImage(user *models.User, lat *float64, lng *float64, 
 	country *string, city *string, date *time.Time) (string, error) {
 
 	//TODO id should be given by MongoDb and then retrieved once uploaded
 	id := primitive.NewObjectID()
+
+	fmt.Println("CITY2:", *city)
+	fmt.Println("COUNTRY2:", *country)
 	
 	newImage := &models.Image{
 		ID: id,
-		User_id: "user id", // TODO , user needs to be inserted 
+		User_id: (*user).ID,
 		City: *city,
 		Country: *country,
 		Lat: *lat,
@@ -109,12 +123,12 @@ func (is *imageService) CreateImage(lat *float64, lng *float64,
 //TODO 
 //change this function to a scheduled one
 //goes through tmp folder and uploads all images in there
-func (is *imageService) UploadImage(image *multipart.File, id, file_extension string) error {
+func (is *imageService) UploadImage(image *multipart.File, userID, imageID, file_extension string) error {
 
 	var (
 		bucket_name = os.Getenv("BUCKET_NAME")
 		client = GetGCS()
-		filename = fmt.Sprintf("%s%s",id, file_extension)
+		filename = fmt.Sprintf("%s-%s%s",userID, imageID, file_extension)
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
@@ -135,9 +149,9 @@ func (is *imageService) UploadImage(image *multipart.File, id, file_extension st
 	return nil
 }
 
-func (is *imageService) StoreImage(image *multipart.File, user_id, image_id, file_extension string) error {
+func (is *imageService) StoreImage(image *multipart.File, user_id primitive.ObjectID, image_id, file_extension string) error {
 
-	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id, image_id, file_extension))
+	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id.Hex(), image_id, file_extension))
 	defer dst.Close()
 	if err != nil {
 		fmt.Println("Unable to create temp file. Error:", err)
@@ -155,11 +169,12 @@ func (is *imageService) StoreImage(image *multipart.File, user_id, image_id, fil
 //TODO
 //needs to look to database and google cloud storage and create a struct in order to
 //return the right information to frontend
-func (is *imageService) GetAllImages(ctx context.Context) ([]models.Image, error) {
-	//TODO 
-	//is result empty?
-	//should only retrieve images of the given user
-	result, err := is.imageCollection.Find(ctx, bson.D{{}})
+func (is *imageService) GetAllImages(ctx context.Context, user *models.User) ([]ImageInfo, error) {
+
+
+	//confirm that it returns
+	fmt.Println("USER_ID:", (*user).ID)
+	result, err := is.imageCollection.Find(ctx, bson.M{"user_id": (*user).ID})
 	if err != nil {
 		fmt.Println("Error retrieving images from database. Error:", err)
 		return nil, unableToFindImages
@@ -172,5 +187,38 @@ func (is *imageService) GetAllImages(ctx context.Context) ([]models.Image, error
 		return nil, unableToFindImages
 	}
 
-	return images, nil
+	if images == nil{
+		return []ImageInfo{}, nil
+	}
+
+
+	// get all images from user in gcs
+	userID := ((*user).ID).Hex()
+	signedURLs := GetSignedURLs(userID)
+
+	//loop through images in db and match with signed url
+
+	var res []ImageInfo
+
+	for _, image := range images {
+		// TODO
+		// check that in fact image id exists in gcs
+		imageID := image.ID.Hex()
+
+		imageInfo := ImageInfo{
+			ID: imageID,
+			Url: signedURLs[imageID],
+			City: image.City,
+			Country: image.Country,
+			Lat: image.Lat,
+			Lng: image.Lng,
+			Date: image.Date,
+		}
+
+		res = append(res, imageInfo)
+	}
+
+	// return this new structure with required info
+
+	return res, nil
 }

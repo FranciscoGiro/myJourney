@@ -52,7 +52,7 @@ func setServer(h *Handlers) *gin.Engine {
 	routes.POST("/signup", h.userController.Signup)
 	routes.POST("/login", h.userController.Login)
 
-	authRoutes := app.Group("/api")//.Use(middlewares.AuthMiddleware())
+	authRoutes := app.Group("/api").Use(middlewares.AuthMiddleware())
 	authRoutes.POST("/images", h.imageController.UploadImage)
 	authRoutes.GET("/images", h.imageController.GetAllImages)
 

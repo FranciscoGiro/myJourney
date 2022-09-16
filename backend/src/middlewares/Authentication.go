@@ -21,13 +21,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 
-		user, err := auth.ValidateToken(token)
+		payload, err := auth.ValidateToken(token)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
 			return
 		}
 
-		ctx.Set("user", user)
+		ctx.Set("user", (*payload).User)
 		ctx.Next()
 	}
 }

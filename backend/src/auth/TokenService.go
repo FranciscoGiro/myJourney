@@ -16,7 +16,7 @@ var(
 
 
 type Payload struct {
-	User *models.User `json:user`
+	User models.User `json:user`
 	jwt.StandardClaims
 }
 
@@ -28,7 +28,7 @@ func GenerateToken(user *models.User) (string, error){
     expirationTime := time.Now().Add(15 * time.Minute)
 
     payload := &Payload{
-		User: user,
+		User: (*user),
 		StandardClaims: jwt.StandardClaims {
 			ExpiresAt: expirationTime.Unix(),
 		},
