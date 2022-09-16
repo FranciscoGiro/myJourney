@@ -59,10 +59,6 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 		return
 	}
 
-	fmt.Println("CITY:", city)
-	fmt.Println("COUNTRY:", country)
-
-
 	image_id, err := ic.imageService.CreateImage(&user,&lat, &lng, &country, &city, &date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
@@ -101,10 +97,7 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 
 func (ic *ImageController) GetAllImages(c *gin.Context){
 
-	//get current user
 	user, _ := c.MustGet("user").(models.User)
-
-	//look for all images in database
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

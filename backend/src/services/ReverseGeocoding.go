@@ -45,15 +45,11 @@ func ReverseGeocode(lat, lng *float64) (string, string, error){
 
 	var city, country string
 
-	fmt.Println("DATA:", res.Body)
 
 	for _, item := range data.Items {
 		city = item.Address.City
 		country = item.Address.CountryName
 	}
-
-	fmt.Println("CITY3:", city)
-	fmt.Println("COUNTRY3:", country)
 
 	return city, country, nil
 }

@@ -11,14 +11,15 @@ import(
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var Client *mongo.Client
 
 func Init() {
-	db_username := os.Getenv("MONGODB_USERNAME")
-	db_pass := os.Getenv("MONGODB_PASS")
+	DBusername := os.Getenv("MONGODB_USERNAME")
+	DBpass := os.Getenv("MONGODB_PASS")
 
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().
-    	ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@cluster0.k5ro1ld.mongodb.net/?retryWrites=true&w=majority", db_username, db_pass)).
+    	ApplyURI(fmt.Sprintf("mongodb+srv://%s:%s@cluster0.k5ro1ld.mongodb.net/?retryWrites=true&w=majority", DBusername, DBpass)).
     	SetServerAPIOptions(serverAPIOptions)
 	
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -31,11 +32,8 @@ func Init() {
 	}
 
 	fmt.Println("Successfully connect to database")
-
-
 }
 
-var Client *mongo.Client
 
 func GetDB() *mongo.Client {
 	return Client

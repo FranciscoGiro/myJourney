@@ -48,78 +48,6 @@ func GetGCS() *storage.Client {
 }
 
 
-//TODO
-//should this function continue despite some error?
-func UploadImages() error {
-
-	var (
-		bucket_name = os.Getenv("BUCKET_NAME")
-	)
-
-	files, err := ioutil.ReadDir("src/tmp/")
-	if err != nil {
-		//erro
-		return err
-	}
-
-
-	ctx, cancel := context.WithTimeout(context.Background(), 100 * time.Second)
-	defer cancel()
-
-	for _, f := range files {
-
-		fmt.Println("FILENAME:", f.Name())
-
-		file, err := os.Open(fmt.Sprintf("src/tmp/%s", f.Name()))
-		if err != nil {
-			fmt.Println("Unable to open file. Error:", err)
-			return UnableToUpload
-		}
-
-
-		obj := Client.Bucket(bucket_name).Object("photos/"+file.Name()).NewWriter(ctx)
-		if _, err := io.Copy(obj, file); err != nil {
-			fmt.Println("Error coping image image to Google Cloud Storage. Error:", err)
-			return UnableToUpload
-		}
-
-		if err := obj.Close(); err != nil {
-			fmt.Println("Error closing Google Cloud Storage file. Error:", err)
-			return UnableToUpload
-		}
-
-		//isUploaded
-		collection := database.GetCollection("Images")
-
-		c, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
-		defer cancel()
-
-		i := strings.Split(file.Name(), "-")[1]
-		id := strings.Split(i, ".")[0]
-		fmt.Println("ID:", id)
-		imageID, err := primitive.ObjectIDFromHex(id)
-		if err != nil {
-			fmt.Println("Unable to convert string to ObjectID. Error:", err)
-			return UnableToUpload
-		}
-
-		fmt.Println("IMAGE ID:", imageID)
-
-		filter := bson.D{{"_id", imageID}}
-		update := bson.D{{"$set", bson.D{{"isUploaded", true}}}}
-
-		_, err = collection.UpdateOne(c, filter, update)
-		if err != nil {
-			fmt.Println("unable to update 'isUploaded'. Error:", err)
-			return UnableToUpload
-		}
-
-	}
-
-	return nil
-}
-
-
 func GetSignedURLs(userID string) map[string]string {
 
 	var (
@@ -165,7 +93,8 @@ func GetSignedURLs(userID string) map[string]string {
 	for _, obj := range objects {
 		u, err := Client.Bucket(bucketName).SignedURL(obj, opts)
 		if err != nil {
-			fmt.Println("SIGNED URLs:", signedURLs)
+			
+			fmt.Println("Error signing object. Error:", err)
 			//raise error
 		}
 		imageID := FilenameToImageID(obj)

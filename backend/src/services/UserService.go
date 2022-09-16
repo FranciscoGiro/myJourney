@@ -42,17 +42,7 @@ func NewUserService() *userService {
 
 func (us *userService) GetUsers(ctx context.Context) ([]models.User, error) {
 
-	fmt.Println(ctx)
-
-	err := UploadImages()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	return nil, err
-
-	/*result, err := us.userCollection.Find(ctx, bson.D{{}})
+	result, err := us.userCollection.Find(ctx, bson.D{{}})
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -65,18 +55,19 @@ func (us *userService) GetUsers(ctx context.Context) ([]models.User, error) {
 		return nil, err
 	}
 
-	return users, nil*/
+	return users, nil
 }
 
 func (us *userService) GetUserByID(user_id string) (models.User, error) {
 
 	var user models.User
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	uid, _ := primitive.ObjectIDFromHex(user_id)
+	id, _ := primitive.ObjectIDFromHex(user_id)
 
-	err := us.userCollection.FindOne(ctx, bson.M{"_id": uid}).Decode(&user)
+	err := us.userCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return models.User{}, userNotFoundError

@@ -34,9 +34,9 @@ type Claims struct {
 func (uc *UserController) Signup(c *gin.Context) {
 
 	var body struct {
-		Name string	`json:"name"`
-		Email string	`json:"email"`
-		Password string	`json:"password"`
+		Name 		string		`json:"name"`
+		Email 		string		`json:"email"`
+		Password 	string		`json:"password"`
 	}
 
 	err := c.Bind(&body)
@@ -121,9 +121,9 @@ func (uc *UserController) GetUsers(c *gin.Context){
 }
 
 func (uc *UserController) GetUser(c *gin.Context){
-	user_id := c.Param("id")
+	userID := c.Param("id")
 
-	user, err := uc.userService.GetUserByID(user_id)
+	user, err := uc.userService.GetUserByID(userID)
 
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})

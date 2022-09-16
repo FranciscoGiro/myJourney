@@ -62,7 +62,6 @@ func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, ti
 
 	metadata, err := exif.Decode(*image)
     if err != nil {
-		// fix this, should not be error 400
 		fmt.Println("Unable to read EXIF metadata. Error:", err)
 		return lat, lng, date, unableToReadEXIF
     }
@@ -82,17 +81,17 @@ func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, ti
 	return lat, lng, date, nil
 }
 
-//save image inside tmp folder
-//save it also inside a temporary user folder in order to upload to google cloud storage
-func (is *imageService) CreateImage(user *models.User, lat *float64, lng *float64, 
-	country *string, city *string, date *time.Time) (string, error) {
+func (is *imageService) CreateImage(
+							user *models.User, 
+							lat *float64, lng *float64, 
+							country *string, city *string, 
+							date *time.Time
+							) (string, error) {
 
-	//TODO id should be given by MongoDb and then retrieved once uploaded
+	//TODO 
+	//id should be given by MongoDb and then retrieved once uploaded
 	id := primitive.NewObjectID()
 
-	fmt.Println("CITY2:", *city)
-	fmt.Println("COUNTRY2:", *country)
-	
 	newImage := &models.Image{
 		ID: id,
 		User_id: (*user).ID,
@@ -120,10 +119,10 @@ func (is *imageService) CreateImage(user *models.User, lat *float64, lng *float6
 
 
 
-//TODO 
-//change this function to a scheduled one
-//goes through tmp folder and uploads all images in there
-func (is *imageService) UploadImage(image *multipart.File, userID, imageID, file_extension string) error {
+func (is *imageService) UploadImage(
+							image *multipart.File, 
+							userID, imageID, file_extension string
+							) error {
 
 	var (
 		bucket_name = os.Getenv("BUCKET_NAME")
@@ -144,12 +143,13 @@ func (is *imageService) UploadImage(image *multipart.File, userID, imageID, file
 		return unableToUpload
 	}
 
-	//TODO isUploaded= true in database
-
 	return nil
 }
 
-func (is *imageService) StoreImage(image *multipart.File, user_id primitive.ObjectID, image_id, file_extension string) error {
+func (is *imageService) StoreImage(image *multipart.File, 
+								   user_id primitive.ObjectID,
+								   image_id, file_extension string
+								   ) error {
 
 	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id.Hex(), image_id, file_extension))
 	defer dst.Close()
@@ -169,11 +169,12 @@ func (is *imageService) StoreImage(image *multipart.File, user_id primitive.Obje
 //TODO
 //needs to look to database and google cloud storage and create a struct in order to
 //return the right information to frontend
-func (is *imageService) GetAllImages(ctx context.Context, user *models.User) ([]ImageInfo, error) {
+func (is *imageService) GetAllImages(
+									ctx context.Context, 
+									user *models.User) 
+									([]ImageInfo, error) {
 
 
-	//confirm that it returns
-	fmt.Println("USER_ID:", (*user).ID)
 	result, err := is.imageCollection.Find(ctx, bson.M{"user_id": (*user).ID})
 	if err != nil {
 		fmt.Println("Error retrieving images from database. Error:", err)
@@ -201,24 +202,24 @@ func (is *imageService) GetAllImages(ctx context.Context, user *models.User) ([]
 	var res []ImageInfo
 
 	for _, image := range images {
-		// TODO
-		// check that in fact image id exists in gcs
 		imageID := image.ID.Hex()
-
-		imageInfo := ImageInfo{
-			ID: imageID,
-			Url: signedURLs[imageID],
-			City: image.City,
-			Country: image.Country,
-			Lat: image.Lat,
-			Lng: image.Lng,
-			Date: image.Date,
+		url, ok := signedURLs[imageID]
+		if ok {
+			imageInfo := ImageInfo{
+				ID: imageID,
+				Url: url,
+				City: image.City,
+				Country: image.Country,
+				Lat: image.Lat,
+				Lng: image.Lng,
+				Date: image.Date,
+			}
+	
+			res = append(res, imageInfo)
+		} else {
+			fmt.Println("Object not found in GCS")
 		}
-
-		res = append(res, imageInfo)
 	}
-
-	// return this new structure with required info
 
 	return res, nil
 }
