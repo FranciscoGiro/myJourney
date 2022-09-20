@@ -32,7 +32,8 @@ func main() {
 
 	h := handlers() 
 	app := setServer(h)
-	app.Run(":"+port)
+	//app.Run(":"+port)
+	app.RunTLS(":"+port, "./certs/cert.pem", "./certs/key.pem")
 }
 
 

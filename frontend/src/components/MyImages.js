@@ -16,11 +16,11 @@ export default function MyImages() {
 
     //TODO delete this
     const allImages = [
-        {id:1, imageName: "img.jpg", date: "18-02-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
-        {id:2, imageName: "hori.jpg", date: "18-02-2022", place: "Quarteira, Algarve", height:"150px", width:"300px"},
-        {id:3, imageName: "img.jpg", date: "18-02-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
-        {id:4, imageName: "img.jpg", date: "18-02-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
-        {id:5, imageName: "img.jpg", date: "18-02-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"}
+        {id:1, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
+        {id:2, imageName: "hori.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"150px", width:"300px"},
+        {id:3, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
+        {id:4, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
+        {id:5, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"}
     ]
 
 

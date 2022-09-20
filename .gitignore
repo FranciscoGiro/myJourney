@@ -1,5 +1,6 @@
 backend/.env
 backend/credentials.json
 backend/src/tmp/
+backend/certs/*
 
 frontend/.env
