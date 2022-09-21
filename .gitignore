@@ -4,5 +4,6 @@ backend/src/tmp/
 
 frontend/.env
 
-
 # https certs
+frontend/certs
+backend/certs
