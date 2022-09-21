@@ -34,7 +34,7 @@ type Claims struct {
 func (uc *UserController) Signup(c *gin.Context) {
 
 	var body struct {
-		Name 		string		`json:"name"`
+		Name 		string		`json:"username"`
 		Email 		string		`json:"email"`
 		Password 	string		`json:"password"`
 	}
@@ -44,6 +44,9 @@ func (uc *UserController) Signup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not parse request body"})
 		return
 	}
+
+	fmt.Println("NAME:", body.Name)
+	fmt.Println("EMAIL:", body.Email)
 
 
 	err = uc.userService.CheckUserExists(body.Name, body.Email)

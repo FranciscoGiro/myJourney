@@ -4,6 +4,7 @@ import './App.css';
 import Home from './components/Home'
 import MyMap from './components/MyMap'
 import Navbar from './components/Navbar'
+import Register from './components/Register'
 import UploadImage from './components/UploadImage'
 import MyImages from './components/MyImages'
 import NotFound from './components/NotFound'
@@ -21,6 +22,7 @@ export default function App() {
               <Route path='/myimages' element={<MyImages /> }/>
               <Route path='/map' element={<MyMap /> }/>
               <Route path='/upload' element={<UploadImage /> }/>
+              <Route path='/register' element={<Register /> }/>
               <Route path='*' element={<NotFound />}/>
           </Routes>
         </Router>

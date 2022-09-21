@@ -5,6 +5,31 @@ import axios from 'axios';
 const BASE_URL = process.env.REACT_APP_API_URL; 
 
 
+export const register = async (username, email, password) => {
+    
+    try {
+        const res = await axios({
+            method: "post",
+            url: `${BASE_URL}/auth/register`,
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({ username, email, password }),
+        });
+
+        console.log(res.data)
+
+        if(res.status === 200){
+            return res.data
+        } else {
+            return "Something unexpected happened. Please, upload again"
+        }
+    } catch(error) {
+        console.log(error)
+        return error
+    }
+};
+
+
 /** No param required to retrieve all images */ 
 const getAllUsers = () => { 
     return axios 

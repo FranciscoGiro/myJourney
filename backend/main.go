@@ -32,8 +32,8 @@ func main() {
 
 	h := handlers() 
 	app := setServer(h)
-	//app.Run(":"+port)
-	app.RunTLS(":"+port, "./certs/cert.pem", "./certs/key.pem")
+	app.Run(":"+port)
+	//app.RunTLS(":"+port, "./certs/cert.pem", "./certs/key.pem")
 }
 
 
@@ -50,7 +50,7 @@ func setServer(h *Handlers) *gin.Engine {
 	app.Use(middlewares.Cors())
 	
 	routes := app.Group("/api/auth")
-	routes.POST("/signup", h.userController.Signup)
+	routes.POST("/register", h.userController.Signup)
 	routes.POST("/login", h.userController.Login)
 
 	authRoutes := app.Group("/api").Use(middlewares.AuthMiddleware())

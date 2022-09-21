@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
-import '../App.css';
+import '../styles/my-map.css';
 import "mapbox-gl/dist/mapbox-gl.css";
  
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
@@ -39,6 +39,8 @@ export default function MyMap() {
     });
     
     return (
-    <div ref={mapContainer} className="map-container" />
+    <div className='map-background'>
+      <div ref={mapContainer} className="map-container" />
+    </div>
     );
 }
