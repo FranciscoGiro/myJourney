@@ -5,18 +5,8 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-
-.navbar {
-  margin: 0;
-  padding: 0px;
-  background-color: black;
-  color: white;
-  text-align: center;
-}
-
-.navbar > h1 {
-  padding: 20px;
-  margin: 0;
+.App {
+  min-height: 100vh;
 }
 
 .map-container {

@@ -1,21 +1,51 @@
 import React from 'react';
 import { useRef, useState, useEffect, useContext } from 'react';
+import "../styles/login.css"
 
 export default function Login() {
+
+  const [user, setUser] = useState('');
+  const [pwd, setPwd] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+
+  useEffect(() => {
+    setErrMsg('');
+}, [user, pwd])
   
   return(
-    <form>
-      <label>
-        <p>Username</p>
-        <input type="text" />
-      </label>
-      <label>
-        <p>Password</p>
-        <input type="password" />
-      </label>
-      <div>
-        <button type="submit">Submit</button>
-      </div>
-    </form>
+    <div className='login-container'>
+      <form className='login-form'>
+        <h3 className='login-title'>Login Here</h3>
+        <div className='form-entry'>
+          <label className='form-label'>
+            Username
+          </label>
+          <input
+            type="text"
+            id="username"
+            className='form-input'
+            onChange={(e) => setUser(e.target.value)}
+            value={user}
+            required
+          ></input>
+        </div>
+        <div className='form-entry'>
+          <label className='form-label'>
+            Password
+          </label>
+          <input
+            type="password"
+            id="password"
+            className='form-input'
+            onChange={(e) => setPwd(e.target.value)}
+            value={pwd}
+            required
+          ></input>
+        </div>
+        <div>
+          <button type="submit">Login</button>
+        </div>
+      </form>
+    </div>
   )
 }
