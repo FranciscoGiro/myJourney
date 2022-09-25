@@ -20,7 +20,8 @@ export default function MyImages() {
         {id:2, imageName: "hori.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"150px", width:"300px"},
         {id:3, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
         {id:4, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
-        {id:5, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"}
+        {id:5, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"},
+        {id:6, imageName: "img.jpg", date: "13-08-2022", place: "Quarteira, Algarve", height:"250px", width:"200px"}
     ]
 
 
@@ -29,8 +30,10 @@ export default function MyImages() {
             {allImages.map(image => (
                 <div key={image.id} className="image-card">
                     <img className="image" height={image.height} width={image.width} src={image.imageName} alt="" />
-                    <h3 className='image-date'>{image.date}</h3>
-                    <h3 className='image-place'>{image.place}</h3>
+                    <div className='image-info'>
+                        <h3 className='image-date'>{image.date}</h3>
+                        <h3 className='image-place'>{image.place}</h3>
+                    </div>
                 </div>
             ))}
         </div>

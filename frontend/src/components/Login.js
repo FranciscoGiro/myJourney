@@ -42,9 +42,7 @@ export default function Login() {
             required
           ></input>
         </div>
-        <div>
-          <button type="submit">Login</button>
-        </div>
+        <button className="login-button" type="submit">Login</button>
       </form>
     </div>
   )

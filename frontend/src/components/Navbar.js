@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {Link} from "react-router-dom";
-import "../styles/Navbar.css"
+import "../styles/nav-bar.css"
 
 function Navbar() {
   const [clicked, setClicked] = useState(false);
@@ -12,9 +12,11 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <h1 className='nav-logo'>MyJourney<i className='fab fa-react'></i></h1>
-      <div className='menu-icon' onClick={handleMenuClick}>
-        <i className={clicked ? 'fas fa-times' : 'fas fa-bars'}></i>
+      <div className='nav-info'>
+        <h1 className='nav-name'>MyJourney</h1>
+        <div className='menu-icon' onClick={handleMenuClick}>
+          <i className={clicked ? 'fas fa-times' : 'fas fa-bars'}></i>
+        </div>
       </div>
       <ul className={clicked ? 'nav-menu active' : 'nav-menu'}>
         <li><Link className='nav-link' to='/home'>Home</Link></li>

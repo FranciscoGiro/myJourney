@@ -1,0 +1,59 @@
+.navbar {
+    height: 70px;
+    width: 100%;
+    background-color: blue;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 2.3rem;
+    z-index: 1;
+}
+
+.nav-info {
+    display: inline;
+    width: 500px;
+    padding-left: 30px;
+}
+
+.nav-name {
+    display: inline;
+    font-size: 2rem;
+    color: white;
+    padding-right: 5px;
+}
+
+.menu-icon {
+    position: absolute;
+    left: -1000000px;
+}
+
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    justify-content: end;
+    margin-right: 30px;
+    gap: 20px;
+}
+
+.nav-menu li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.nav-link {
+    text-decoration: none;
+    color: white;
+    white-space: nowrap;
+    font-size: 1.2rem;
+}
+
+.nav-link:hover {
+    color: black
+}

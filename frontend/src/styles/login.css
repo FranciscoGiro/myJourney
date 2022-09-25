@@ -48,3 +48,14 @@
 .form-input{
     width: 100%;
 }
+
+.login-button {
+    padding: 10px;
+    background-color: blue;
+    font-weight: bold;
+    color: white;
+}
+
+.login-button:hover, .login-button:focus {
+    opacity: 50%;
+}
