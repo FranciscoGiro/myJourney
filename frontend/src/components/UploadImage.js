@@ -13,6 +13,7 @@ import {
   RemoveFileIcon,
   InputLabel
 } from "../styles/file-upload";
+import "../styles/file-upload.css"
 
 const KILO_BYTES_PER_BYTE = 1000;
 const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 500000;
@@ -67,11 +68,11 @@ const UploadImage = () => {
 
 
   return (
-    <>
-      <FileUploadContainer>
-        <InputLabel>Upload here your new journey</InputLabel>
-        <DragDropText>Drag and drop your files anywhere or</DragDropText>
-        <UploadFileBtn type="button" onClick={handleUploadBtnClick}>
+    <div className="background">
+      <h3 className="fu-title">Upload here your new journey</h3>
+      <FileUploadContainer className="fu-container">
+        <DragDropText className="block">Drag and drop your files anywhere or</DragDropText>
+        <UploadFileBtn className="block" type="button" onClick={handleUploadBtnClick}>
           <i className="fas fa-file-upload" />
           <span> Upload files</span>
         </UploadFileBtn>
@@ -84,34 +85,40 @@ const UploadImage = () => {
           multiple
         />
       </FileUploadContainer>
-      <FilePreviewContainer>
-        <span>To Upload</span>
-        <PreviewList>
-          {files.map((file) => {
-            return (
-              <PreviewContainer key={file.name}>
-                <div>
-                  <ImagePreview
-                    src={URL.createObjectURL(file)}
-                  />
-                  <FileMetaData isImageFile={true}>
-                    <span>{file.name}</span>
-                    <aside>
-                      <span>{convertBytesToKB(file.size)} kb</span>
-                      <RemoveFileIcon
-                        className="fas fa-trash-alt"
-                        onClick={() => removeFile(file.name)}
-                      />
-                    </aside>
-                  </FileMetaData>
-                </div>
-              </PreviewContainer>
-            );
-          })}
-        </PreviewList>
-      </FilePreviewContainer>
-      <button onClick={upload}>Confirm Upload</button>
-    </>
+      {
+        files.length == 0 ?
+        <br></br>
+        :
+        <FilePreviewContainer>
+          <span>To Upload</span>
+          <PreviewList>
+            {files.map((file) => {
+              return (
+                <PreviewContainer key={file.name}>
+                  <div>
+                    <ImagePreview
+                      src={URL.createObjectURL(file)}
+                    />
+                    <FileMetaData isImageFile={true}>
+                      <span>{file.name}</span>
+                      <aside>
+                        <span>{convertBytesToKB(file.size)} kb</span>
+                        <RemoveFileIcon
+                          className="fas fa-trash-alt"
+                          onClick={() => removeFile(file.name)}
+                        />
+                      </aside>
+                    </FileMetaData>
+                  </div>
+                </PreviewContainer>
+              );
+            })}
+          </PreviewList>
+        </FilePreviewContainer>
+      }
+        <button className="fu-button" onClick={upload}>Confirm Upload</button>    
+
+    </div>
   );
 };
 

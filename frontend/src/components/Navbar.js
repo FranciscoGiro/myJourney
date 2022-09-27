@@ -13,7 +13,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className='nav-info'>
-        <h1 className='nav-name'>MyJourney</h1>
+        <Link className='nav-name' to='/home'>MyJourney</Link>
         <div className='menu-icon' onClick={handleMenuClick}>
           <i className={clicked ? 'fas fa-times' : 'fas fa-bars'}></i>
         </div>

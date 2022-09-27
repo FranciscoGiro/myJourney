@@ -1,0 +1,29 @@
+.background {
+    width: 80%;
+    margin: 50px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.fu-title {
+    width: 50%;
+    align-self: center;
+    font-size: 1.5rem;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    background-color: blue;
+}
+
+
+.fu-button {
+    width: 50%;
+    margin: auto;
+    cursor: pointer;
+}
+
+.fu-button:hover {
+    color: aqua;
+    background-color: black;
+}
