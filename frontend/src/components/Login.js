@@ -1,8 +1,14 @@
 import React from 'react';
 import { useRef, useState, useEffect, useContext } from 'react';
+import {Link, useNavigate} from "react-router-dom";
+import { login } from "../services/RemoteServices"
 import "../styles/login.css"
 
 export default function Login() {
+
+  let navigate = useNavigate()
+
+  const errRef = useRef();
 
   const [user, setUser] = useState('');
   const [pwd, setPwd] = useState('');
@@ -10,11 +16,38 @@ export default function Login() {
 
   useEffect(() => {
     setErrMsg('');
-}, [user, pwd])
+  }, [user, pwd])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      const response = await login(user, pwd)
+      // TODO: remove console.logs before deployment
+      if(response.data){
+          console.log(JSON.stringify(response.data));
+      }
+      setUser('');
+      setPwd('');
+
+      navigate('/home')
+
+    } catch (err) {
+        if (!err.response) {
+            setErrMsg('No Server Response');
+        } else if (err.response.status === 400) {
+            setErrMsg('Username or password missing');
+        } else {
+            setErrMsg('Registration Failed')
+        }
+        errRef.current.focus();
+    }
+  }
   
   return(
     <div className='login-container'>
       <form className='login-form'>
+        <p ref={errRef} className={errMsg ? "errmsg" : "hide"}>{errMsg}</p>
         <h3 className='login-title'>Login Here</h3>
         <div className='form-entry'>
           <label className='form-label'>
@@ -42,7 +75,14 @@ export default function Login() {
             required
           ></input>
         </div>
-        <button className="login-button" type="submit">Login</button>
+        
+        <button className="login-button" onClick={handleSubmit}>Login</button>
+        <p className="not-signed-in">
+                Not registered?<br />
+                <span className="line">
+                    <Link to="/register" className="sign-in">Register now!</Link>
+                </span>
+            </p>
       </form>
     </div>
   )

@@ -26,7 +26,7 @@ type UserService interface {
 	GetUsers(ctx context.Context) ([]models.User, error)
 	GetUserByID(user_id string) (models.User, error)
 	GetUser(name, email string) (models.User, error)
-	CreateUser(name, email, pass string) error
+	CreateUser(name string, email string, pass []byte) error
 	CheckUserExists(name, email string) error
 }
 
@@ -104,7 +104,7 @@ func (us *userService) GetUser(name, email string) (models.User, error) {
 	return user, nil
 }
 
-func (us *userService) CreateUser(name, email, pass string) error {
+func (us *userService) CreateUser(name string, email string, pass []byte) error {
 
 	user := &models.User{
 		Name: name,

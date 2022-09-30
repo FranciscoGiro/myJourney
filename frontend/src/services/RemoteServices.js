@@ -5,6 +5,32 @@ import axios from 'axios';
 const BASE_URL = process.env.REACT_APP_API_URL; 
 
 
+export const login = async (username, password) => {
+    
+    try {
+        const res = await axios({
+            method: "post",
+            url: `${BASE_URL}/auth/login`,
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({ username, password }),
+        });
+
+        console.log(res.data)
+
+        if(res.status === 200){
+            console.log(res.data)
+            return res.data
+        } else {
+            return "Something unexpected happened. Please, upload again"
+        }
+    } catch(error) {
+        console.log(error.response.data.error)
+        return error
+    }
+};
+
+
 export const register = async (username, email, password) => {
     
     try {

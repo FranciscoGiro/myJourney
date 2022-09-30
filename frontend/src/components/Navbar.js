@@ -24,7 +24,6 @@ function Navbar() {
         <li><Link className='nav-link' to='/myimages'>My Images</Link></li>
         <li><Link className='nav-link' to='/upload'>Upload</Link></li>
         <li><Link className='nav-link' to='/login'>Login</Link></li>
-        <li><Link className='nav-link' to='/register'>Register</Link></li>
       </ul>
     </nav>
   )

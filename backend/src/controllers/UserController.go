@@ -45,10 +45,6 @@ func (uc *UserController) Signup(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("NAME:", body.Name)
-	fmt.Println("EMAIL:", body.Email)
-
-
 	err = uc.userService.CheckUserExists(body.Name, body.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -62,7 +58,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 		return
 	}
 
-	err = uc.userService.CreateUser(body.Name, body.Email, string(hash_pass)) //provavel erro na hash
+	err = uc.userService.CreateUser(body.Name, body.Email, hash_pass) //provavel erro na hash
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to create user"})
 		return
@@ -74,7 +70,7 @@ func (uc *UserController) Signup(c *gin.Context) {
 
 func (uc *UserController) Login(c *gin.Context) {
 	var body struct {
-		Name string	`json:"name"`
+		Name string	`json:"username"`
 		Password string	`json:"password"`
 	}
 
@@ -90,7 +86,9 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
+	fmt.Println("Hashed:", user.Password)
+	fmt.Println("New:", body.Password)
+	err = bcrypt.CompareHashAndPassword(user.Password, []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
 		return
