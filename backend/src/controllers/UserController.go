@@ -94,15 +94,62 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := auth.GenerateToken(&user)
+	access_token, refresh_token, err := auth.GenerateToken(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errors.New("Unable to register. Please try again"))
 		return
 	}
 
-	c.SetCookie("Authorization", token, 3600, "", "", false, true)
+	uc.userService.SaveRefreshToken(refresh_token, user.ID)
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
+}
+
+func (uc *UserController) Refresh(c *gin.Context) {
+
+	token, err := c.Cookie("Authorization")
+	if err != nil {
+		fmt.Println("Unable to retrieve auth cookie. Error:", err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Unable to read auth cookie"))
+		return
+	}
+
+	payload, err := auth.ValidateToken(token)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+			return
+		}
+
+	givenUser := (*payload).User
+	fmt.Println("UserID:", givenUser.ID.Hex())
+	user, err := uc.userService.GetUserByID(givenUser.ID.Hex()) //TODO error Hex import
+	if err != nil {
+		fmt.Println("O erro está aqui", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	if token != user.RefreshToken {
+		fmt.Println("error here", err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+		return
+	}
+
+	// everything ok. Now generate new tokens
+
+	access_token, refresh_token, err := auth.GenerateToken(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errors.New("Unable to generate tokens"))
+		return
+	}
+
+	uc.userService.SaveRefreshToken(refresh_token, user.ID)
+
+	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
 }
 
 func (uc *UserController) GetUsers(c *gin.Context){

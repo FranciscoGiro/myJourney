@@ -33,6 +33,7 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 	if err != nil {
 		fmt.Println("Unable to get files from form-data. Error:", err)
 		c.JSON(http.StatusInternalServerError, errors.New("Unable to read uploaded files. Please try again"))
+		return
 	}
 
 

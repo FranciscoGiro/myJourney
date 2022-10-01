@@ -20,6 +20,7 @@ var(
 	emailAlreadyExistsError = errors.New("Email already exists")
 	usernameAlreadyExistsError = errors.New("Username already exists")
 	unableToRegisterError = errors.New("Unable to register user")
+	unabletoUpdateRefreshTokenError = errors.New("Unable to update refresh token in database")
 )
 
 type UserService interface {
@@ -28,6 +29,7 @@ type UserService interface {
 	GetUser(name, email string) (models.User, error)
 	CreateUser(name string, email string, pass []byte) error
 	CheckUserExists(name, email string) error
+	SaveRefreshToken(refreshToken string, userID primitive.ObjectID) error
 }
 
 type userService struct {
@@ -127,6 +129,22 @@ func (us *userService) CreateUser(name string, email string, pass []byte) error 
 
 	return nil
 }
+
+
+func (us *userService) SaveRefreshToken(refreshToken string, userID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.D{{"_id", userID}}
+	update := bson.D{{"$set", bson.D{{"refreshToken", refreshToken}}}}
+	_, err := us.userCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return unabletoUpdateRefreshTokenError
+	}
+
+	return nil
+}
+
 
 func (us *userService) CheckUserExists(name, email string) error {
 

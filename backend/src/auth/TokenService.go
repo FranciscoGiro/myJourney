@@ -21,28 +21,43 @@ type Payload struct {
 }
 
 
-func GenerateToken(user *models.User) (string, error){
+func GenerateToken(user *models.User) (string, string, error){
 
 	var secret_key = []byte(os.Getenv("SECRET_KEY"))
 
-    expirationTime := time.Now().Add(15 * time.Minute)
+    token_exp_time := time.Now().Add(5 * time.Minute)
+    refresh_exp_time := time.Now().Add(1 * time.Hour)
 
     payload := &Payload{
 		User: (*user),
 		StandardClaims: jwt.StandardClaims {
-			ExpiresAt: expirationTime.Unix(),
+			ExpiresAt: token_exp_time.Unix(),
+		},
+	}
+
+	refresh_payload := &Payload{
+		User: (*user),
+		StandardClaims: jwt.StandardClaims {
+			ExpiresAt: refresh_exp_time.Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	refresh := jwt.NewWithClaims(jwt.SigningMethodHS256, refresh_payload)
 
-	signed_token, err := token.SignedString(secret_key)
+	access_token, err := token.SignedString(secret_key)
 	if err != nil {
 		fmt.Println("Error signing token:", err)
-		return "", invalidTokenError
+		return "", "", invalidTokenError
 	}
 
-    return signed_token, nil
+	refresh_token, err := refresh.SignedString(secret_key)
+	if err != nil {
+		fmt.Println("Error signing refresh token:", err)
+		return "", "", invalidTokenError
+	}
+
+    return access_token, refresh_token, nil
 }
 
 func ValidateToken(token string) (*Payload, error) {

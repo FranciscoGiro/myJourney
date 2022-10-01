@@ -20,7 +20,7 @@
     width: 90%;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
     border-radius: 5%;
 
@@ -53,6 +53,7 @@
     background-color: blue;
     font-weight: bold;
     color: white;
+    border-radius: 0.5rem;
 }
 
 .login-button:hover, .login-button:focus {
@@ -69,14 +70,4 @@
 
 .sign-in:hover {
     opacity: 50%;
-}
-
-.hide {
-    position: absolute;
-    left: -1000000;
-}
-
-.errmsg {
-    color: red;
-    background-color: blue;
 }

@@ -115,9 +115,6 @@ func (is *imageService) CreateImage(
 	return id.Hex(), nil
 } 
 
-
-
-
 func (is *imageService) UploadImage(
 							image *multipart.File, 
 							userID, imageID, file_extension string) error {

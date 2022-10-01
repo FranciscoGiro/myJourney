@@ -1,9 +1,9 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"errors"
+	"strings"
 	"github.com/gin-gonic/gin"
 
 	"github.com/FranciscoGiro/myJourney/backend/src/auth"
@@ -11,23 +11,29 @@ import (
 
 
 func AuthMiddleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+	return func(c *gin.Context) {
 
-		token, err := ctx.Cookie("Authorization")
-		if err != nil {
-			fmt.Println("Unable to retrieve auth cookie. Error:", err)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Unable to read auth cookie"))
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("No authorization header set"))
 			return
 		}
 
+		authParts := strings.Split(authHeader, " ")
+		if authParts[0] != "Bearer" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid access token type"))
+			return
+		}
+
+		token := authParts[1]
 
 		payload, err := auth.ValidateToken(token)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
 			return
 		}
 
-		ctx.Set("user", (*payload).User)
-		ctx.Next()
+		c.Set("user", (*payload).User)
+		c.Next()
 	}
 }

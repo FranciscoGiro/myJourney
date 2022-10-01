@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { uploadImages } from "../services/RemoteServices"
+import React, { useRef, useState } from 'react';
+import { uploadImages } from '../api/RemoteServices';
 import {
   FileUploadContainer,
   FormField,
@@ -10,16 +10,14 @@ import {
   PreviewContainer,
   PreviewList,
   FileMetaData,
-  RemoveFileIcon,
-  InputLabel
-} from "../styles/file-upload";
-import "../styles/file-upload.css"
+  RemoveFileIcon
+} from '../styles/file-upload';
+import '../styles/file-upload.css';
 
 const KILO_BYTES_PER_BYTE = 1000;
-const DEFAULT_MAX_FILE_SIZE_IN_BYTES = 500000;
 
-const convertNestedObjectToArray = (nestedObj) =>
-  Object.keys(nestedObj).map((key) => nestedObj[key]);
+/* const convertNestedObjectToArray = (nestedObj) =>
+  Object.keys(nestedObj).map((key) => nestedObj[key]); */
 
 const convertBytesToKB = (bytes) => Math.round(bytes / KILO_BYTES_PER_BYTE);
 
@@ -31,41 +29,30 @@ const UploadImage = () => {
     fileInputField.current.click();
   };
 
-  /*const addNewFiles = (newFiles) => {
+  /* const addNewFiles = (newFiles) => {
     for (let file of newFiles) {
       if (file.size < DEFAULT_MAX_FILE_SIZE_IN_BYTES) {
         files[file.name] = file;
       }
     }
     return { ...files };
-  };*/
+  }; */
 
   const handleNewFileUpload = (e) => {
     const { files: newFiles } = e.target;
-    console.log(newFiles)
-    let newFile = e.target.files[0]
-    /*files.map((file) => {
-      if(file.name == newFile.name) {
-        //TODO raise error. Duplicate file with same name
-      } 
-    })*/
-
     setFiles([...files, ...newFiles]);
-    console.log(files.length)
   };
 
   const removeFile = (fileName) => {
-    let newArray = files.filter((file) => file.name !== fileName)
-    setFiles([ ...newArray ]);
-    console.log(files.length)
+    const newArray = files.filter((file) => file.name !== fileName);
+    setFiles([...newArray]);
+    console.log(files.length);
   };
 
   const upload = async () => {
-    const res = await uploadImages(files)
-    //TODO deal with response
+    const res = await uploadImages(files);
+    // TODO deal with response
   };
-
-
 
   return (
     <div className="background">
@@ -86,37 +73,36 @@ const UploadImage = () => {
         />
       </FileUploadContainer>
       {
-        files.length == 0 ?
-        <br></br>
-        :
-        <FilePreviewContainer>
-          <span>To Upload</span>
-          <PreviewList>
-            {files.map((file) => {
-              return (
-                <PreviewContainer key={file.name}>
-                  <div>
-                    <ImagePreview
-                      src={URL.createObjectURL(file)}
-                    />
-                    <FileMetaData isImageFile={true}>
-                      <span>{file.name}</span>
-                      <aside>
-                        <span>{convertBytesToKB(file.size)} kb</span>
-                        <RemoveFileIcon
-                          className="fas fa-trash-alt"
-                          onClick={() => removeFile(file.name)}
-                        />
-                      </aside>
-                    </FileMetaData>
-                  </div>
-                </PreviewContainer>
-              );
-            })}
-          </PreviewList>
-        </FilePreviewContainer>
+        files.length == 0
+          ? <br></br>
+          : <FilePreviewContainer>
+            <span>To Upload</span>
+            <PreviewList>
+              {files.map((file) => {
+                return (
+                  <PreviewContainer key={file.name}>
+                    <div>
+                      <ImagePreview
+                        src={URL.createObjectURL(file)}
+                      />
+                      <FileMetaData isImageFile={true}>
+                        <span>{file.name}</span>
+                        <aside>
+                          <span>{convertBytesToKB(file.size)} kb</span>
+                          <RemoveFileIcon
+                            className="fas fa-trash-alt"
+                            onClick={() => removeFile(file.name)}
+                          />
+                        </aside>
+                      </FileMetaData>
+                    </div>
+                  </PreviewContainer>
+                );
+              })}
+            </PreviewList>
+          </FilePreviewContainer>
       }
-        <button className="fu-button" onClick={upload}>Confirm Upload</button>    
+      <button className="fu-button" onClick={upload}>Confirm Upload</button>
 
     </div>
   );
