@@ -26,11 +26,11 @@ var(
 )
 
 type ImageService interface {
-	GetAllImages(ctx context.Context, user *models.User) ([]ImageInfo, error)
-	CreateImage(user *models.User, lat *float64, lng *float64, country *string, 
+	GetAllImages(ctx context.Context, userID *primitive.ObjectID) ([]ImageInfo, error)
+	CreateImage(userID *primitive.ObjectID, lat *float64, lng *float64, country *string, 
 		city *string, date *time.Time) (string, error)
 	UploadImage(image *multipart.File, userID, imageID, file_extension string) error
-	StoreImage(image *multipart.File, user_id primitive.ObjectID, image_id, file_extension string) error
+	StoreImage(image *multipart.File, userID, image_id, file_extension string) error
 	GetMetadata(image *multipart.File) (float64, float64, time.Time, error)
 }
 
@@ -82,7 +82,7 @@ func (is *imageService) GetMetadata(image *multipart.File) (float64, float64, ti
 }
 
 func (is *imageService) CreateImage(
-							user *models.User, 
+							userID *primitive.ObjectID, 
 							lat *float64, lng *float64, 
 							country *string, city *string, 
 							date *time.Time) (string, error) {
@@ -93,7 +93,7 @@ func (is *imageService) CreateImage(
 
 	newImage := &models.Image{
 		ID: id,
-		User_id: (*user).ID,
+		User_id: *userID,
 		City: *city,
 		Country: *country,
 		Lat: *lat,
@@ -142,10 +142,9 @@ func (is *imageService) UploadImage(
 }
 
 func (is *imageService) StoreImage(image *multipart.File, 
-								   user_id primitive.ObjectID,
-								   image_id, file_extension string) error {
+								   userID, image_id, file_extension string) error {
 
-	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", user_id.Hex(), image_id, file_extension))
+	dst, err := os.Create(fmt.Sprintf("src/tmp/%s-%s%s", userID, image_id, file_extension))
 	defer dst.Close()
 	if err != nil {
 		fmt.Println("Unable to create temp file. Error:", err)
@@ -165,10 +164,10 @@ func (is *imageService) StoreImage(image *multipart.File,
 //return the right information to frontend
 func (is *imageService) GetAllImages(
 									ctx context.Context, 
-									user *models.User) ([]ImageInfo, error) {
+									userID *primitive.ObjectID) ([]ImageInfo, error) {
 
 
-	result, err := is.imageCollection.Find(ctx, bson.M{"user_id": (*user).ID})
+	result, err := is.imageCollection.Find(ctx, bson.M{"user_id": *userID})
 	if err != nil {
 		fmt.Println("Error retrieving images from database. Error:", err)
 		return nil, unableToFindImages
@@ -187,8 +186,7 @@ func (is *imageService) GetAllImages(
 
 
 	// get all images from user in gcs
-	userID := ((*user).ID).Hex()
-	signedURLs := GetSignedURLs(userID)
+	signedURLs := GetSignedURLs((*userID).Hex())
 
 	//loop through images in db and match with signed url
 
@@ -210,7 +208,7 @@ func (is *imageService) GetAllImages(
 	
 			res = append(res, imageInfo)
 		} else {
-			fmt.Println("Object not found in GCS. UserID:", userID, "   ImageID:", imageID)
+			fmt.Println("Object not found in GCS. UserID:", (*userID).Hex(), "   ImageID:", imageID)
 		}
 	}
 

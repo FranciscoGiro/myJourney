@@ -7,6 +7,8 @@ import(
     "errors"
     "github.com/dgrijalva/jwt-go"
     "github.com/FranciscoGiro/myJourney/backend/src/models"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var(
@@ -16,7 +18,10 @@ var(
 
 
 type Payload struct {
-	User models.User `json:user`
+	UserID 		primitive.ObjectID 		`json:userID`
+	Username 	string 					`json:username`
+	Role 		string 					`json:role`
+	User models.User 					`json:user`
 	jwt.StandardClaims
 }
 
@@ -29,14 +34,18 @@ func GenerateToken(user *models.User) (string, string, error){
     refresh_exp_time := time.Now().Add(1 * time.Hour)
 
     payload := &Payload{
-		User: (*user),
+		UserID: (*user).ID,
+		Username: (*user).Name,
+		Role: (*user).Role,
 		StandardClaims: jwt.StandardClaims {
 			ExpiresAt: token_exp_time.Unix(),
 		},
 	}
 
 	refresh_payload := &Payload{
-		User: (*user),
+		UserID: (*user).ID,
+		Username: (*user).Name,
+		Role: (*user).Role,
 		StandardClaims: jwt.StandardClaims {
 			ExpiresAt: refresh_exp_time.Unix(),
 		},

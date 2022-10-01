@@ -86,8 +86,6 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("Hashed:", user.Password)
-	fmt.Println("New:", body.Password)
 	err = bcrypt.CompareHashAndPassword(user.Password, []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
@@ -104,7 +102,7 @@ func (uc *UserController) Login(c *gin.Context) {
 
 	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
+	c.JSON(http.StatusOK, access_token)
 }
 
 func (uc *UserController) Refresh(c *gin.Context) {
@@ -126,13 +124,11 @@ func (uc *UserController) Refresh(c *gin.Context) {
 	fmt.Println("UserID:", givenUser.ID.Hex())
 	user, err := uc.userService.GetUserByID(givenUser.ID.Hex()) //TODO error Hex import
 	if err != nil {
-		fmt.Println("O erro está aqui", err)
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	if token != user.RefreshToken {
-		fmt.Println("error here", err)
 		c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
 		return
 	}

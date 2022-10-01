@@ -55,7 +55,6 @@ func GetSignedURLs(userID string) map[string]string {
 	defer cancel()
 
 	prefix := fmt.Sprintf("photos/%s-", userID)
-	fmt.Println("Prefix: ", prefix)
 	it := Client.Bucket(bucketName).Objects(ctx, &storage.Query{
         Prefix: prefix,
 	})
@@ -72,7 +71,6 @@ func GetSignedURLs(userID string) map[string]string {
                 return signedURLs //err
         }
 		objects = append(objects, attrs.Name)
-        fmt.Println("OBJECT:", attrs.Name)
 		}
 
 	//sign each object and add to signedURLs

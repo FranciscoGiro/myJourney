@@ -4,35 +4,36 @@ import axiosPrivate from '../api/axios';
 import '../styles/my-images.css';
 
 export default function MyImages () {
-  const [images] = useState([]);
+  const [images, setImages] = useState([]);
 
-  console.log(images);
+  useEffect(() => {
+    const getImages = async () => {
+      try {
+        const res = await axiosPrivate({
+          method: 'get',
+          url: '/images'
+        });
 
-  /*   useEffect(async () => {
-    try {
-      const res = await axiosPrivate({
-        method: 'get',
-        url: '/images'
-      });
+        setImages(res.data);
+      } catch (err) {
+        // error handler
+      }
+    };
+    getImages();
+  }, []);
 
-      setImages(res.data);
-    } catch (err) {
-      // error handler
-    }
-  }, []); */
-
-  const allImages = [
+  /*   const allImages = [
     { id: 1, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
     { id: 2, imageName: 'hori.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '150px', width: '300px' },
     { id: 3, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
     { id: 4, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
     { id: 5, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
     { id: 6, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' }
-  ];
+  ]; */
 
   return (
     <div className='image-gallery'>
-      {allImages.map(image => (
+      {images.map(image => (
         <div key={image.id} className="image-card">
           <img className="image" height={image.height} width={image.width} src={image.imageName} alt="" />
           <div className='image-info'>

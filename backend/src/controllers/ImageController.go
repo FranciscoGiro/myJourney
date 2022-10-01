@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/FranciscoGiro/myJourney/backend/src/services"
-	"github.com/FranciscoGiro/myJourney/backend/src/models"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ImageController struct {
@@ -26,8 +26,7 @@ func NewImageController() *ImageController {
 
 func (ic *ImageController) UploadImage(c *gin.Context){
 
-	user, _ := c.MustGet("user").(models.User)
-	userID := user.ID.Hex()
+	userID, _ := c.MustGet("user").(primitive.ObjectID)
 	
 	image, header, err := c.Request.FormFile("file")
 	if err != nil {
@@ -60,14 +59,14 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 		return
 	}
 
-	image_id, err := ic.imageService.CreateImage(&user,&lat, &lng, &country, &city, &date)
+	image_id, err := ic.imageService.CreateImage(&userID, &lat, &lng, &country, &city, &date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
 
-	err = ic.imageService.StoreImage(&image, user.ID, image_id, file_extension)
+	err = ic.imageService.StoreImage(&image, userID.Hex(), image_id, file_extension)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
@@ -83,7 +82,7 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 
 	go func() {
 		start := time.Now()
-		err := ic.imageService.UploadImage(&image, userID, image_id, file_extension)
+		err := ic.imageService.UploadImage(&image, userID.Hex(), image_id, file_extension)
 		if err != nil{
 			fmt.Println("ERRO A DAR UPLOAD PARA A GCS:", err)
 		}
@@ -98,12 +97,12 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 
 func (ic *ImageController) GetAllImages(c *gin.Context){
 
-	user, _ := c.MustGet("user").(models.User)
+	userID, _ := c.MustGet("user").(primitive.ObjectID)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	images, err := ic.imageService.GetAllImages(ctx, &user)
+	images, err := ic.imageService.GetAllImages(ctx, &userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
