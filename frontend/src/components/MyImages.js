@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import axiosPrivate from '../api/axios';
+import { Link } from 'react-router-dom';
 import '../styles/my-images.css';
 
 export default function MyImages () {
@@ -32,16 +33,31 @@ export default function MyImages () {
   ]; */
 
   return (
-    <div className='image-gallery'>
-      {images.map(image => (
-        <div key={image.id} className="image-card">
-          <img className="image" height={image.height} width={image.width} src={image.imageName} alt="" />
-          <div className='image-info'>
-            <h3 className='image-date'>{image.date}</h3>
-            <h3 className='image-place'>{image.place}</h3>
+    <>
+      {
+        images.length > 0
+          ? <div className='image-gallery'>
+            {images.map(image => (
+              <div key={image.id} className="image-card">
+                <img className="image" height={image.height} width={image.width} src={image.imageName} alt="" />
+                <div className='image-info'>
+                  <h3 className='image-date'>{image.date}</h3>
+                  <h3 className='image-place'>{image.place}</h3>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
+          : <div className='no-img'>
+            <h1>Sorry!</h1>
+            <h1>You have no images uploaded!</h1>
+            <h2>Click
+              <span>
+                <Link to="/upload"> here </Link>
+              </span>
+              to upload
+            </h2>
+          </div>
+      }
+    </>
   );
 }

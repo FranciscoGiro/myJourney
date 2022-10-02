@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import {Link} from "react-router-dom";
-import "../styles/nav-bar.css"
+import { Link } from 'react-router-dom';
+import '../styles/nav-bar.css';
 
-function Navbar() {
+function Navbar () {
   const [clicked, setClicked] = useState(false);
 
   const handleMenuClick = () => {
-    setClicked(!clicked)
+    setClicked(!clicked);
   };
-
 
   return (
     <nav className="navbar">
@@ -26,7 +25,7 @@ function Navbar() {
         <li><Link className='nav-link' to='/login'>Login</Link></li>
       </ul>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
