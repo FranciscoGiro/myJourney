@@ -1,11 +1,11 @@
-import axios from './RemoteServices';
-import useAuth from './useAuth';
+import axios from './axios';
+import useAuth from '../context/useAuth';
 
 const useRefreshToken = () => {
   const { setAuth } = useAuth();
 
   const refresh = async () => {
-    const response = await axios.get('/refresh', {
+    const response = await axios.post('/auth/refresh', {
       withCredentials: true
     });
     setAuth(prev => {

@@ -37,6 +37,8 @@ export default function Login () {
       const accessToken = res.data?.access_token;
       const role = res.data?.role;
 
+      console.log(accessToken);
+
       setUser('');
       setPwd('');
       setAuth({ role, accessToken });

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { uploadImages } from '../api/RemoteServices';
+import useAxiosPrivate from '../api/useAxiosPrivate';
 import {
   FileUploadContainer,
   FormField,
@@ -22,6 +22,7 @@ const KILO_BYTES_PER_BYTE = 1000;
 const convertBytesToKB = (bytes) => Math.round(bytes / KILO_BYTES_PER_BYTE);
 
 const UploadImage = () => {
+  const axiosPrivate = useAxiosPrivate();
   const fileInputField = useRef(null);
   const [files, setFiles] = useState([]);
 
@@ -50,8 +51,27 @@ const UploadImage = () => {
   };
 
   const upload = async () => {
-    const res = await uploadImages(files);
-    // TODO deal with response
+    const formData = new FormData();
+    files.map(file =>
+      formData.append('file', file)
+    );
+
+    try {
+      const res = await axiosPrivate({
+        method: 'post',
+        url: '/images/upload',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.status === 200) {
+        return 'Images uploaded successfully';
+      } else {
+        return 'Something unexpected happened. Please, upload again';
+      }
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
   };
 
   return (
@@ -73,7 +93,7 @@ const UploadImage = () => {
         />
       </FileUploadContainer>
       {
-        files.length == 0
+        files.length === 0
           ? <br></br>
           : <FilePreviewContainer>
             <span>To Upload</span>

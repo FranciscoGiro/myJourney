@@ -1,7 +1,7 @@
 import { axiosPrivate } from '../api/axios';
 import { useEffect } from 'react';
 import useRefreshToken from './useRefreshToken';
-import useAuth from './useAuth';
+import useAuth from '../context/useAuth';
 
 const useAxiosPrivate = () => {
   const refresh = useRefreshToken();
@@ -10,6 +10,8 @@ const useAxiosPrivate = () => {
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       config => {
+        console.log('Vou meter a header da auth a:');
+        console.log(auth?.accessToken);
         if (!config.headers.Authorization) {
           config.headers.Authorization = `Bearer ${auth?.accessToken}`;
         }

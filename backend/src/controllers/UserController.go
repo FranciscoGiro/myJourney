@@ -102,7 +102,7 @@ func (uc *UserController) Login(c *gin.Context) {
 
 	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
 
-	c.JSON(http.StatusOK, access_token)
+	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
 }
 
 func (uc *UserController) Refresh(c *gin.Context) {

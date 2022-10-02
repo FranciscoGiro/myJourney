@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import axiosPrivate from '../api/axios';
+import useAxiosPrivate from '../api/useAxiosPrivate';
 import { Link } from 'react-router-dom';
 import '../styles/my-images.css';
 
 export default function MyImages () {
+  const axiosPrivate = useAxiosPrivate();
   const [images, setImages] = useState([]);
 
   useEffect(() => {
