@@ -92,7 +92,6 @@ func GetSignedURLs(userID string) map[string]string {
 		signedURLs[imageID] = u
 	}
 
-	fmt.Println("SIGNED URLs:", signedURLs)
 	return signedURLs
 }
 

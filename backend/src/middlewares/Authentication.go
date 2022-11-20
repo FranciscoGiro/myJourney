@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"errors"
 	"strings"
@@ -15,13 +16,15 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("No authorization header set"))
+			fmt.Println("No Authorization header found.")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("No authorization header set."))
 			return
 		}
 
 		authParts := strings.Split(authHeader, " ")
 		if authParts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid access token type"))
+			fmt.Println("Access token is not of type Bearer $token.")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid access token type."))
 			return
 		}
 
@@ -29,7 +32,8 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		payload, err := auth.ValidateToken(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+			fmt.Println(err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token."))
 			return
 		}
 

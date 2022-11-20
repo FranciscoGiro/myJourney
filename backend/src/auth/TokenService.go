@@ -21,7 +21,6 @@ type Payload struct {
 	UserID 		primitive.ObjectID 		`json:userID`
 	Username 	string 					`json:username`
 	Role 		string 					`json:role`
-	User models.User 					`json:user`
 	jwt.StandardClaims
 }
 

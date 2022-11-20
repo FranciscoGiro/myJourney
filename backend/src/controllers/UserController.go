@@ -7,13 +7,12 @@ import (
 	"net/http"
 	"errors"
 	"github.com/FranciscoGiro/myJourney/backend/src/services"
-	"github.com/FranciscoGiro/myJourney/backend/src/models"
 	"github.com/FranciscoGiro/myJourney/backend/src/auth"
 
-	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type UserController struct {
@@ -24,11 +23,6 @@ func NewUserController() *UserController {
     return &UserController{
 		userService: services.NewUserService(),
 	}
-}
-
-type Claims struct {
-	User *models.User `json:user`
-	jwt.StandardClaims
 }
 
 func (uc *UserController) Signup(c *gin.Context) {
@@ -69,40 +63,48 @@ func (uc *UserController) Signup(c *gin.Context) {
 }
 
 func (uc *UserController) Login(c *gin.Context) {
+	validate := validator.New()
+
 	var body struct {
-		Name string	`json:"username"`
-		Password string	`json:"password"`
+		Name string	`json:"username" validate:"required"`
+		Password string	`json:"password" validate:"required"`
 	}
 
 	err := c.Bind(&body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not parse request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No request body."})
 		return
 	}
+	err = validate.Struct(body)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username/password. Try again"})
+		return
+    }
+
 
 	user, err := uc.userService.GetUser(body.Name, body.Name)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = bcrypt.CompareHashAndPassword(user.Password, []byte(body.Password))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Wrong password. Try again"})
 		return
 	}
 
-	access_token, refresh_token, err := auth.GenerateToken(&user)
+	accessToken, refreshToken, err := auth.GenerateToken(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errors.New("Unable to register. Please try again"))
 		return
 	}
 
-	uc.userService.SaveRefreshToken(refresh_token, user.ID)
+	uc.userService.SaveRefreshToken(refreshToken, user.ID)
 
-	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
+	c.SetCookie("Authorization", refreshToken, 3600, "/", "localhost", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken})
 }
 
 func (uc *UserController) Refresh(c *gin.Context) {
@@ -115,37 +117,36 @@ func (uc *UserController) Refresh(c *gin.Context) {
 	}
 
 	payload, err := auth.ValidateToken(token)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
-			return
-		}
-
-	givenUser := (*payload).User
-	fmt.Println("UserID:", givenUser.ID.Hex())
-	user, err := uc.userService.GetUserByID(givenUser.ID.Hex()) //TODO error Hex import
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+		return
+	}
+
+	givenUserID := (*payload).UserID
+	user, err := uc.userService.GetUserByID(givenUserID.Hex()) //TODO error Hex import
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	if token != user.RefreshToken {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, errors.New("Invalid token"))
+		c.JSON(http.StatusUnauthorized, errors.New("Invalid token"))
 		return
 	}
 
 	// everything ok. Now generate new tokens
 
-	access_token, refresh_token, err := auth.GenerateToken(&user)
+	accessToken, refreshToken, err := auth.GenerateToken(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errors.New("Unable to generate tokens"))
 		return
 	}
 
-	uc.userService.SaveRefreshToken(refresh_token, user.ID)
+	uc.userService.SaveRefreshToken(refreshToken, user.ID)
 
-	c.SetCookie("Authorization", refresh_token, 3600, "", "", false, true)
+	c.SetCookie("Authorization", refreshToken, 3600, "", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"access_token": access_token})
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken})
 }
 
 func (uc *UserController) GetUsers(c *gin.Context){

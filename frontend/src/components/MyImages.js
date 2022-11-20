@@ -7,6 +7,7 @@ import '../styles/my-images.css';
 export default function MyImages () {
   const axiosPrivate = useAxiosPrivate();
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getImages = async () => {
@@ -17,6 +18,7 @@ export default function MyImages () {
         });
 
         setImages(res.data);
+        setLoading(false);
       } catch (err) {
         // error handler
       }
@@ -35,15 +37,16 @@ export default function MyImages () {
 
   return (
     <>
-      {
-        images.length > 0
+      { loading
+        ? <h1>Loading...</h1>
+        : images.length > 0
           ? <div className='image-gallery'>
             {images.map(image => (
               <div key={image.id} className="image-card">
-                <img className="image" height={image.height} width={image.width} src={image.imageName} alt="" />
+                <img className="image" height="100px" width="100px" src={image.url} alt="" />
                 <div className='image-info'>
                   <h3 className='image-date'>{image.date}</h3>
-                  <h3 className='image-place'>{image.place}</h3>
+                  <h3 className='image-place'>{image.city}</h3>
                 </div>
               </div>
             ))}
