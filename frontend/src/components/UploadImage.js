@@ -25,19 +25,13 @@ const UploadImage = () => {
   const axiosPrivate = useAxiosPrivate();
   const fileInputField = useRef(null);
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [message, setMessage] = useState(null);
 
   const handleUploadBtnClick = () => {
     fileInputField.current.click();
   };
-
-  /* const addNewFiles = (newFiles) => {
-    for (let file of newFiles) {
-      if (file.size < DEFAULT_MAX_FILE_SIZE_IN_BYTES) {
-        files[file.name] = file;
-      }
-    }
-    return { ...files };
-  }; */
 
   const handleNewFileUpload = (e) => {
     const { files: newFiles } = e.target;
@@ -49,81 +43,102 @@ const UploadImage = () => {
     setFiles([...newArray]);
   };
 
-  const upload = async () => {
+  const upload = async (e) => {
+    e.preventDefault();
     const formData = new FormData();
     files.map(file =>
       formData.append('file', file)
     );
 
     try {
+      setLoading(true);
       const res = await axiosPrivate({
         method: 'post',
-        url: '/images/upload',
+        url: '/images',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      setLoading(false);
       if (res.status === 200) {
-        return 'Images uploaded successfully';
+        setFiles([]);
+        setSuccess(true);
+        setMessage('Images uploaded successfully');
       } else {
-        return 'Something unexpected happened. Please, upload again';
+        setSuccess(false);
+        setMessage('Error uploading images. Please try again.');
       }
+      setTimeout(() => { setMessage(null); setSuccess(null); }, 2000);
     } catch (error) {
+      setFiles([]);
+      setSuccess(false);
+      setMessage('Error uploading images. Please try again.');
+      setLoading(false);
+      setTimeout(() => { setMessage(null); setSuccess(null); }, 5000);
       console.log(error);
       return error;
     }
   };
 
   return (
-    <div className="background">
-      <h3 className="fu-title">Upload here your new journey</h3>
-      <FileUploadContainer className="fu-container">
-        <DragDropText className="block">Drag and drop your files anywhere or</DragDropText>
-        <UploadFileBtn className="block" type="button" onClick={handleUploadBtnClick}>
-          <i className="fas fa-file-upload" />
-          <span> Upload files</span>
-        </UploadFileBtn>
-        <FormField
-          type="file"
-          ref={fileInputField}
-          onChange={handleNewFileUpload}
-          title=""
-          value=""
-          multiple
-        />
-      </FileUploadContainer>
-      {
-        files.length === 0
-          ? <br></br>
-          : <FilePreviewContainer>
-            <span>To Upload</span>
-            <PreviewList>
-              {files.map((file) => {
-                return (
-                  <PreviewContainer key={file.name}>
-                    <div>
-                      <ImagePreview
-                        src={URL.createObjectURL(file)}
-                      />
-                      <FileMetaData isImageFile={true}>
-                        <span>{file.name}</span>
-                        <aside>
-                          <span>{convertBytesToKB(file.size)} kb</span>
-                          <RemoveFileIcon
-                            className="fas fa-trash-alt"
-                            onClick={() => removeFile(file.name)}
+    <>
+      { loading
+        ? <div className="loader-container">
+          <div className="spinner"></div>
+        </div>
+        : <div className="background">
+          <h3 className="fu-title">Upload here your new journey</h3>
+          <FileUploadContainer className="fu-container">
+            <DragDropText className="block">Drag and drop your files anywhere or</DragDropText>
+            <UploadFileBtn className="block" type="button" onClick={handleUploadBtnClick}>
+              <i className="fas fa-file-upload" />
+              <span> Upload files</span>
+            </UploadFileBtn>
+            <FormField
+              type="file"
+              ref={fileInputField}
+              onChange={handleNewFileUpload}
+              title=""
+              value=""
+              multiple
+            />
+          </FileUploadContainer>
+          {
+            files.length === 0
+              ? <br></br>
+              : <FilePreviewContainer>
+                <span>To Upload</span>
+                <PreviewList>
+                  {files.map((file) => {
+                    return (
+                      <PreviewContainer key={file.name}>
+                        <div>
+                          <ImagePreview
+                            src={URL.createObjectURL(file)}
                           />
-                        </aside>
-                      </FileMetaData>
-                    </div>
-                  </PreviewContainer>
-                );
-              })}
-            </PreviewList>
-          </FilePreviewContainer>
-      }
-      <button className="fu-button" onClick={upload}>Confirm Upload</button>
+                          <FileMetaData isImageFile={true}>
+                            <span>{file.name}</span>
+                            <aside>
+                              <span>{convertBytesToKB(file.size)} kb</span>
+                              <RemoveFileIcon
+                                className="fas fa-trash-alt"
+                                onClick={() => removeFile(file.name)}
+                              />
+                            </aside>
+                          </FileMetaData>
+                        </div>
+                      </PreviewContainer>
+                    );
+                  })}
+                </PreviewList>
+              </FilePreviewContainer>
+          }
+          {message &&
+            <p className="message" style={{ backgroundColor: `${success ? 'green' : 'red'}` }}>{message}</p>}
+          <button className="fu-button" onClick={upload}>Confirm Upload</button>
 
-    </div>
+        </div>
+      }
+    </>
   );
 };
 

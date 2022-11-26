@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"path/filepath"
+	"image/jpeg"
 
 	"github.com/FranciscoGiro/myJourney/backend/src/services"
 
@@ -79,10 +80,12 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 		return
 	}
 
+	newImage := resize.Resize(160, 0, original_image, resize.Lanczos3)
+	err = jpeg.Encode(someWriter, newImage, nil)
 
 	go func() {
 		start := time.Now()
-		err := ic.imageService.UploadImage(&image, userID.Hex(), image_id, file_extension)
+		err := ic.imageService.UploadImage(&newImage, userID.Hex(), image_id, file_extension)
 		if err != nil{
 			fmt.Println("Error uploading to GCS:", err)
 		}

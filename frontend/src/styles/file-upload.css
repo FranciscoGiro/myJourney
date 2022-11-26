@@ -30,3 +30,13 @@
     color: aqua;
     background-color: black;
 }
+
+.message {
+    color: white;
+    margin: auto;
+    text-align: center;
+    width: fit-content;
+    font-weight: bold;
+    padding: 10px;
+    margin-bottom: 20px; 
+}
