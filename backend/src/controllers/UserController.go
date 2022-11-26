@@ -104,7 +104,12 @@ func (uc *UserController) Login(c *gin.Context) {
 
 	c.SetCookie("Authorization", refreshToken, 3600, "/", "localhost", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken})
+	c.JSON(http.StatusOK, gin.H{"accessToken": accessToken, "role":user.Role})
+}
+
+func (uc *UserController) Logout(c *gin.Context) {
+	c.SetCookie("Authorization", "none", 1, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, gin.H{"success": "true"})
 }
 
 func (uc *UserController) Refresh(c *gin.Context) {

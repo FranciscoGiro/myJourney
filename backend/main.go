@@ -55,6 +55,7 @@ func setServer(h *Handlers) *gin.Engine {
 	routes := app.Group("/api/auth")
 	routes.POST("/register", h.userController.Signup)
 	routes.POST("/login", h.userController.Login)
+	routes.GET("/logout", h.userController.Logout)
 	routes.POST("/refresh", h.userController.Refresh)
 
 	authRoutes := app.Group("/api").Use(middlewares.AuthMiddleware())

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const FileUploadContainer = styled.section`
   position: relative;
@@ -148,7 +148,7 @@ export const PreviewList = styled.section`
 `;
 
 export const FileMetaData = styled.div`
-  display: ${(props) => (props.isImageFile ? "none" : "flex")};
+  display: ${(props) => (props.isImageFile ? 'none' : 'flex')};
   flex-direction: column;
   position: absolute;
   top: 0;

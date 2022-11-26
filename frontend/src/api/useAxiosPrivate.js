@@ -10,8 +10,6 @@ const useAxiosPrivate = () => {
   useEffect(() => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       config => {
-        console.log('Vou meter a header da auth a:');
-        console.log(auth?.accessToken);
         if (!config.headers.Authorization) {
           config.headers.Authorization = `Bearer ${auth?.accessToken}`;
         }

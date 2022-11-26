@@ -34,7 +34,7 @@ export default function Login () {
         data: JSON.stringify({ username: user, password: pwd })
       });
 
-      const accessToken = res.data?.access_token;
+      const accessToken = res.data?.accessToken;
       const role = res.data?.role;
 
       console.log(accessToken);

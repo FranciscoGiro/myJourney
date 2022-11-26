@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import useAxiosPrivate from '../api/useAxiosPrivate';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/my-images.css';
 
 export default function MyImages () {
@@ -20,7 +20,9 @@ export default function MyImages () {
         setImages(res.data);
         setLoading(false);
       } catch (err) {
-        // error handler
+        if (err.status === 401) {
+          useNavigate('/login');
+        }
       }
     };
     getImages();
@@ -38,7 +40,9 @@ export default function MyImages () {
   return (
     <>
       { loading
-        ? <h1>Loading...</h1>
+        ? <div className="loader-container">
+          <div className="spinner"></div>
+        </div>
         : images.length > 0
           ? <div className='image-gallery'>
             {images.map(image => (

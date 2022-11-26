@@ -49,6 +49,7 @@
 
 
 .nav-link {
+    background-color: blue;
     text-decoration: none;
     color: white;
     white-space: nowrap;
@@ -61,4 +62,5 @@
     background-color: aliceblue;
     border-radius: 5px;
     opacity: 70%;
+    cursor: pointer;
 }
