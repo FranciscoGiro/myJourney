@@ -42,8 +42,6 @@ function Navbar () {
         <li><Link className='nav-link' to='/map'>Map</Link></li>
         <li><Link className='nav-link' to='/myimages'>My Images</Link></li>
         <li><Link className='nav-link' to='/upload'>Upload</Link></li>
-        {console.log('hi')}
-        {console.log(localStorage.getItem('Authorization'))}
         {auth.accessToken
           ? <li><button className='nav-link' onClick={HandleLogout}>Logout</button></li>
           : <li><Link className='nav-link' to='/login'>Login</Link></li>

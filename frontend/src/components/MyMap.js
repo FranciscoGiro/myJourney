@@ -1,16 +1,24 @@
+/* eslint-disable no-unused-vars */
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
+import useAxiosPrivate from '../api/useAxiosPrivate';
 import '../styles/my-map.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useNavigate } from 'react-router';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
 export default function MyMap () {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-70.9);
-  const [lat, setLat] = useState(42.35);
-  const [zoom, setZoom] = useState(3);
+  const [lng, setLng] = useState(41.3);
+  const [lat, setLat] = useState(12.57);
+  const [zoom, setZoom] = useState(1);
+
+  const axiosPrivate = useAxiosPrivate();
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (map.current) return;
@@ -20,10 +28,37 @@ export default function MyMap () {
       center: [lng, lat],
       zoom
     });
+    const getImages = async () => {
+      try {
+        const res = await axiosPrivate({
+          method: 'get',
+          url: '/images'
+        });
 
-    new mapboxgl.Marker()
-      .setLngLat([30.5, 50.5])
-      .addTo(map.current);
+        setImages(res.data);
+        res.data.map(m => {
+          const popup = new mapboxgl.Popup({ offset: 25 }).setText(
+            'Construction on the Washington Monument began in 1848.');
+
+          const el = document.createElement('div');
+          el.className = 'marker';
+          el.style.backgroundImage = `url(${m.url})`;
+          el.style.width = '50px';
+          el.style.height = '50px';
+          el.style.backgroundSize = '100%';
+
+          return new mapboxgl.Marker(el)
+            .setLngLat([m.lng, m.lat])
+            .addTo(map.current);
+        });
+        setLoading(false);
+      } catch (err) {
+        if (err.status === 401) {
+          navigate('/login');
+        }
+      }
+    };
+    getImages();
   });
 
   useEffect(() => {

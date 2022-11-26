@@ -84,7 +84,7 @@ func (ic *ImageController) UploadImage(c *gin.Context){
 		start := time.Now()
 		err := ic.imageService.UploadImage(&image, userID.Hex(), image_id, file_extension)
 		if err != nil{
-			fmt.Println("ERRO A DAR UPLOAD PARA A GCS:", err)
+			fmt.Println("Error uploading to GCS:", err)
 		}
 		elapsed := time.Since(start)
     	fmt.Println("File upload took %s", elapsed)

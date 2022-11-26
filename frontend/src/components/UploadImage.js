@@ -47,7 +47,6 @@ const UploadImage = () => {
   const removeFile = (fileName) => {
     const newArray = files.filter((file) => file.name !== fileName);
     setFiles([...newArray]);
-    console.log(files.length);
   };
 
   const upload = async () => {

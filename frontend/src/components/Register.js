@@ -60,17 +60,13 @@ const Register = () => {
       return;
     }
     try {
-      const res = await axios({
+      await axios({
         method: 'post',
         url: '/auth/register',
         withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
         data: JSON.stringify({ username: user, email, password: pwd })
       });
-      // TODO: remove console.logs before deployment
-      if (res.data) {
-        console.log(JSON.stringify(res.data));
-      }
       // clear state and controlled inputs
       setUser('');
       setPwd('');

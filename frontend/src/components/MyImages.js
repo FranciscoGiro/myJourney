@@ -8,6 +8,7 @@ export default function MyImages () {
   const axiosPrivate = useAxiosPrivate();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getImages = async () => {
@@ -21,21 +22,12 @@ export default function MyImages () {
         setLoading(false);
       } catch (err) {
         if (err.status === 401) {
-          useNavigate('/login');
+          navigate('/login');
         }
       }
     };
     getImages();
   }, []);
-
-  /*   const allImages = [
-    { id: 1, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
-    { id: 2, imageName: 'hori.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '150px', width: '300px' },
-    { id: 3, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
-    { id: 4, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
-    { id: 5, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' },
-    { id: 6, imageName: 'img.jpg', date: '13-08-2022', place: 'Quarteira, Algarve', height: '250px', width: '200px' }
-  ]; */
 
   return (
     <>
